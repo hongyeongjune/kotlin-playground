@@ -143,4 +143,77 @@ fun eval(expression: Expression): Int =
   * 왜냐하면, 봉인된 인터페이스를 만들 수 있다면 그 인터페이스를 자바 쪽에서 구현하지 못하게 막을 수 있는 수단이 코틀린 컴파일러에는 없기 때문이다.
 * sealed 클래스는 자기 자신이 추상 클래스이고, 자신이 상속받는 여러 클래스를 가질 수 있기 때문에 "enum" 클래스와 달리 상속을 활용한 풍부한 동작을 구현할 수 있다.
 
+### 클래스 초기화: 주 생성자와 초기화 블록
+* 아래 세개의 코드는 모두 다 같은 정의이다.
+```kotlin
+class User constructor(_name: String) {
+    val name: String
+    init {
+        name = _name
+    }
+}
 
+class User(_name: String) {
+    val name = _name
+}
+
+class User(val name: String)
+```
+
+* 함수 파라미터와 마찬가지로 생성자 파라미터에도 디폴트 값을 정의할 수 있다.
+
+```kotlin
+class User(
+  val name: String, 
+  val isSucsribed: Boolean = false,
+)
+```
+
+* 클래스에 기반 클래스가 있다면 주 생성자에서 기반 클래스의 생성자를 호출해야 할 필요가 있다. 기반 클래스를 초기화하려면 기반 클래스 이름 뒤에 괄호를 치고 생성자를 넘긴다.
+
+```kotlin
+open class User(val name: String)
+
+class MainUser(name: String) : User(name)
+```
+
+* 별도로 생성자를 정의하지 않으면 컴파일러가 자동으로 디폴트 생성자를 만들어준다.
+  * 따라서, 생성자를 정의하지 않은 클래스를 상속한 하위 클래스는 반드시 클래스의 생성자를 호출해야한다. 
+  * 아래 코드는 예시다.
+* 반면 인터페이스는 생성자가 없기 때문에 어떤 클래스가 인터페이스를 구현하는 경우 그 클래스의 상위 클래스 목록에 있는 인터페이스 이름 뒤에는 괄호가 없다.
+
+```kotlin
+open class Button
+class RadioButton : Button()
+```
+
+* 어떤 클래스를 클래스 외부에서 인스턴스화하지 못하게 막고 싶다면 모든 생성자를 private 으로 만들면 된다.
+
+```kotlin
+class User private constructor()
+```
+
+### 부 생성자: 상위 클래스를 다른 방식으로 초기화
+* 일반적으로 코틀린에서는 생성자가 여럿 있는 경우가 자바보다 훨씬 적다.
+* 자바에서 오버로드한 생성자가 필요한 상황 중 상당수는 코틀린의 디폴트 파라미터 값과 이름 붙은 인자 문법을 사용해 해결할 수 있다.
+
+```kotlin
+open class Title(val titleNo: Int) {
+    lateinit var subject: String
+    lateinit var description: String
+
+    constructor(titleNo: Int, subject: String) : this(titleNo) {
+        this.subject = subject
+    }
+
+    constructor(titleNo: Int, subject: String, description: String) : this(titleNo, subject) {
+        this.description = description
+    }
+}
+
+class Episode : Title {
+  constructor(titleNo: Int) : super(titleNo)
+  constructor(titleNo: Int, subject: String) : super(titleNo, subject)
+  constructor(titleNo: Int, subject: String, description: String) : super(titleNo, subject, description)
+}
+```
