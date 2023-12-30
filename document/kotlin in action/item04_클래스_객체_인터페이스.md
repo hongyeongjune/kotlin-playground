@@ -217,3 +217,101 @@ class Episode : Title {
   constructor(titleNo: Int, subject: String, description: String) : super(titleNo, subject, description)
 }
 ```
+
+### 데이터 클래스와 불변성: copy() 메서드
+* 데이터 클래스의 모든 프로퍼티를 읽기 전용으로 만들어서 데이터 클래스를 불변 클래스로 만드는 것이 좋다.
+* HashMap 등의 컨테이너에 데이터 클래스 객체를 담는 경우엔 불변성이 필수적이다.
+* 데이터 클래스 객체를 키로 하는 값을 컨테이너에 담은 다음에 키로 쓰인 데이터 객체의 프로퍼티를 변경하면 컨테이너 상태가 잘못될 수 있다.
+* 불변 객체를 주로 사용하는 프로그램에서는 스레드가 사용 중인 데이터를 다른 스레드가 변경할 수 없으므로 스레드를 동기화해야 할 필요가 줄어든다.
+* 데이터 클래스 인스턴스를 불변 객체로 더 쉽게 활용할 수 있게 코틀린 컴파일러는 한 가지 편의 메서드를 제공한다. : copy 메서드
+* 객체를 메모리상에서 직접 바꾸는 대신 복사본을 만드는 편이 더 낫다. 
+* 복사본은 원본과 다른 생명주기를 가지며, 복사를 하면서 일부 프로퍼티 값을 바꾸거나 복사본을 제거해도 프로그램에서 원본을 참조하는 다른 부분에 전혀 영향을 끼치지 않는다.
+
+### by 키워드 사용
+* delegate 패턴은 어떤 기능을 자신이 처리하지 않고, 다른 객체 위임 시켜 그 객체가 일을 처리하도록 만드는 것
+* by 키워드를 사용하면 따로 코드를 작성하지 않아도 바로 위임시킬 수 있다.
+
+```kotlin
+// Delegate 패턴 X
+class TrueBeauty : Webtoon {
+    override fun getTitleNo(): Int {
+        return 1
+    }
+
+    override fun getSubject(): String {
+        return "여신강림"
+    }
+}
+
+// Delegate 패턴 사용
+class Kubera(
+    private val webtoon: Webtoon,
+) : Webtoon {
+    override fun getTitleNo(): Int {
+        return webtoon.getTitleNo()
+    }
+
+    override fun getSubject(): String {
+        return webtoon.getSubject()
+    }
+}
+
+// by 키워드 사용
+class TowerOfGod(
+    private val webtoon: Webtoon,
+) : Webtoon by webtoon
+```
+
+### 객체 선언: 싱글턴 쉽게 만들기 
+* 코틀린은 객체 선언 기능을 통해 싱글턴을 언어에서 기본 지원한다.
+* 객체 선언은 ```object``` 키워드로 시작한다.
+* 하지만, 생성자는 객체 선언에 쓸 수 없다.
+* 일반 클래스 인스턴스와 달리 싱글턴 객체는 객체 선언문이 있는 위치에서 생성자 호출 없이 즉시 만들어지기 때문에 필요 없다.
+
+### 동반 객체: 팩토리 메서드와 정적 멤버가 들어갈 장소
+* 코틀린 클래스 안에는 정적 멤버가 없다.
+* 코틀린 언어는 자바 static 키워드를 지원하지 않는다.
+* 대신 코틀린에서는 패키지 수준의 ```최상위 함수```와 ```객체 선언```을 활용한다.
+* 클래스 안에 정의된 객체 중 하나에 companion object 라는 키워드를 사용하면 클래스의 동반 객체를 만들 수 있다.
+
+```kotlin
+fun main() {
+    Webtoon.trueBeauty()
+}
+
+class Webtoon {
+    companion object {
+        fun trueBeauty() {
+            println("I am true beauty")
+        }
+    }
+}
+```
+```shell
+> I am true beauty
+```
+
+* 동반 객체는 자신을 둘러싼 클래스의 모든 private 멤버에 접근할 수 있다.
+* 따라서 동반 객체는 팩토리 패턴을 구현하기 가장 적합한 위치다.
+
+```kotlin
+class Webtoon private constructor(
+    id: Int,
+    subject: String,
+) {
+    companion object {
+        fun of(
+            id: Int,
+            subject: String,
+        ): Webtoon {
+            return Webtoon(
+                id = id,
+                subject = subject,
+            )
+        }
+    }
+}
+```
+
+* 위 처럼 정적 팩터리 메서드를 사용하기에 적합하다.
+* 정적 팩터리 메서드의 장점은 effective kotlin 33장에서도 설명하고있다.
