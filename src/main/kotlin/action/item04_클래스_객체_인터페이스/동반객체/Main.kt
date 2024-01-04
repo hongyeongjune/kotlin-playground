@@ -16,3 +16,33 @@ class Webtoon private constructor(
         }
     }
 }
+
+interface JSONFactory<T> {
+    fun fromJSON(jsonText: String): T
+}
+
+class Novel private constructor(
+    val subject: String
+) {
+   companion object : JSONFactory<Novel> {
+       override fun fromJSON(jsonText: String): Novel {
+           TODO("Not yet implemented")
+       }
+   }
+}
+
+fun <T> loadFromJSON(factory: JSONFactory<T>): T {
+    TODO("Not yet implemented")
+}
+
+fun main() {
+    loadFromJSON(Novel)
+}
+
+class Comic(val name: String) {
+    companion object
+}
+
+fun Comic.Companion.fromJSON(jsonText: String): Comic {
+    TODO("Not yet implemented")
+}

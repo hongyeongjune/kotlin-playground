@@ -1,3 +1,20 @@
+### 요약
+* 코틀린의 인터페이스는 디폴트 구현을 포함할 수 있고, 프로퍼티도 포함(자바 불가능)할 수 있다.
+* 모든 코틀린 선언은 기본적으로 final 이며 public 이다.
+* 선언이 final 이 되지 않게 만들려면 앞에 open 을 붙여야 한다.
+* internal 선언은 같은 모듈 안에서만 볼 수 있다.
+* 중첩 클래스는 기본적으로 내부 클래스가 아니다. 바깥쪽 클래스에 대한 참조를 중첩 클래스 안에 포함시키려면 inner 키워드를 중첩 클래스 선언 앞에 붙여서 내부 클래스로 만들어야 한다.
+* sealed 클래스를 상속하는 클래스를 정의하려면 반드시 부모 클래스 정의 안에 중첩(또는 내부) 클래스로 정의해야 한다. (코틀린 1.1 부터는 같은 파일 안에만 있으면 된다.)
+* 초기화 블록과 부 생성자를 활용해 클래스 인스턴스를 더 유연하게 초기화할 수 있다.
+* field 식별자를 통해 프로퍼티 접근자(getter setter)안에서 프로퍼티의 데이터를 저장하는데 쓰이는 뒷받침하는 필드를 참조할 수 있다.
+* 데이터 클래스를 사용하면 컴파일러가 equals, hashCode, toString, copy 등의 메서드를 자동으로 생성해준다.
+* 클래스를 위임하면 위임 패턴(by)을 구현할 때 필요한 수많은 코드 준비를 줄일 수 있다.
+* 객체 선언을 사용하면 코틀린답게 싱글턴 클래스를 정의할 수 있다.
+* 동반 객체는 자바의 정적 메서드와 필드 정의를 대신한다.
+* 동반 객체도 다른 객체와 마찬가지로 인터페이스를 구현할 수 있다. 외부에서 동반 객체에 대한 확장 함수와 프로퍼티를 정의할 수 있다.
+* 코틀린의 객체 식은 자바의 익명 클래스를 대신한다. 하지만 코틀린 객체식은 여러 인스턴스를 구현하거나 객체가 포함된 영역에 있는 변수 값을 변경할 수 있는 등 자바 무명 내부 클래스보다 더 많은 기능을 제공한다.
+
+
 ### 코틀린 인터페이스
 * 코틀린 인터페이스 안에는 추상 메서드뿐 아니라 구현이 있는 메서드도 정의할 수 있다.
 * 다만, 인터페이스에는 아무런 상태(필드)도 들어갈 수 없다.
@@ -268,6 +285,16 @@ class TowerOfGod(
 * 하지만, 생성자는 객체 선언에 쓸 수 없다.
 * 일반 클래스 인스턴스와 달리 싱글턴 객체는 객체 선언문이 있는 위치에서 생성자 호출 없이 즉시 만들어지기 때문에 필요 없다.
 
+```kotlin
+object NaverWebtoon { 
+  val allEmployees = listOf<Emplolyee>()
+  
+  fun calculateSalary() {
+    TODO("Not yet implemented")
+  }
+}
+```
+
 ### 동반 객체: 팩토리 메서드와 정적 멤버가 들어갈 장소
 * 코틀린 클래스 안에는 정적 멤버가 없다.
 * 코틀린 언어는 자바 static 키워드를 지원하지 않는다.
@@ -315,3 +342,69 @@ class Webtoon private constructor(
 
 * 위 처럼 정적 팩터리 메서드를 사용하기에 적합하다.
 * 정적 팩터리 메서드의 장점은 effective kotlin 33장에서도 설명하고있다.
+
+
+#### 동반 객체에서 인터페이스를 구현할 수 있다.
+* 아래 코드를 보면 동반 객체에서 인터페이스를 구현했다.
+* 추상 팩터리가 있다면 Novel 객체를 팩터리에게 넘길 수 있다.
+* 즉, 동반 객체가 구현한 인터페이스를 넘길 때 Novel 클래스 이름을 사용했다는 점에 유의해야한다.
+
+```kotlin
+interface JSONFactory<T> {
+    fun fromJSON(jsonText: String): T
+}
+
+class Novel private constructor(
+    val subject: String
+) {
+   companion object : JSONFactory<Novel> {
+       override fun fromJSON(jsonText: String): Novel {
+           TODO("Not yet implemented")
+       }
+   }
+}
+
+fun <T> loadFromJSON(factory: JSONFactory<T>): T {
+  TODO("Not yet implemented")
+}
+
+fun main() {
+  loadFromJSON(Novel)
+}
+```
+
+#### 동반 객체 확장
+* 확장 함수를 사용하면 코드 기반의 다른 곳에서 정의된 클래스의 인스턴스에 대해 새로운 메서드를 정의할 수 있다.
+* 동반 객체에 확장함수를 사용하려면 다음과 같다.
+* 주의점은 동반 객체에 대한 확장함수를 사용하려면 원래 클레스에 동반 객체를 꼭 선언해야 한다는 점에 주의하면 된다.
+
+```kotlin
+class Comic(val name: String) {
+    companion object
+}
+
+fun Comic.Companion.fromJSON(jsonText: String): Comic {
+    TODO("Not yet implemented")
+}
+```
+
+### 객체 식: 무명 내부 클래스를 다른 방식으로 작성
+* object 키워드를 싱글턴과 같은 객체를 정의하고 그 객체에 이름을 붙일 때만 사용하지 않는다.
+* 익명클래스를 정의할 때도 object 키워드를 쓴다.
+* 예를 들어, 이벤트 리스너를 구현하면 다음과 같다.
+
+```kotlinv
+import java.awt.Window
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+
+fun countClicks(window: Window) {
+    var clickCount = 0
+
+    window.addMouseListener(object : MouseAdapter() {
+        override fun mouseClicked(e: MouseEvent?) {
+            clickCount++
+        }
+    })
+}
+```
