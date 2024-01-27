@@ -17,7 +17,8 @@ interface WebtoonFactory {
 fun example1() {
     // type mismatch
     var webtoon1 = TrueBeauty()
-    webtoon1 = Webtoon()
+    // error
+    // webtoon1 = Webtoon()
 
     // TrueBeauty 는 Webtoon 을 상속받고 있기 때문에 해당 코드는 가능 (타입추론)
     var trueBeauty = Webtoon()
@@ -28,7 +29,8 @@ fun example1() {
     webtoon2 = Webtoon()
 
     // type mismatch
-    var kubera: Kubera = Webtoon()
+    // error
+    // var kubera: Kubera = Webtoon()
 }
 
 class WebtoonFactoryImpl : WebtoonFactory {
