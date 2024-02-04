@@ -65,5 +65,3 @@ fun main() {
 * 데코레이터를 사용해서 객체를 Wrap 할 때
   * ```var obj = FileInputStream("/file.gz").let(::BufferedInputStream).let(::ZipInputStream).let(::ObjectInputStream).readObject() as SomeObject```
 
-### 컨벤션
-* 
